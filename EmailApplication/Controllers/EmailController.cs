@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
@@ -14,13 +15,18 @@ namespace EmailApplication.Controllers
         public IActionResult SendEmail(string body) 
         {
             var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse(body));
-            email.To.Add(MailboxAddress.Parse(body));
+            email.From.Add(MailboxAddress.Parse(body));//Username
+            email.To.Add(MailboxAddress.Parse(body));//Password
             email.Subject = "Test email Subject";
             email.Body = new TextPart(TextFormat.Html) { Text = body }; 
 
             using var smtp = new SmtpClient();
-            smtp.Connect("smtp.gmail.com");
+            smtp.Connect("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
+            smtp.Authenticate(body,body);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+
+            return Ok();
         }
     }
 }
